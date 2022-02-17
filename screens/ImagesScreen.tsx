@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import {
 	Image,
 	StyleSheet,
@@ -6,18 +6,25 @@ import {
 	Button,
 	ListRenderItem,
 	ListRenderItemInfo,
+	RefreshControl,
 } from 'react-native'
 import * as FileSystem from 'expo-file-system'
 import singleFileUploader from 'single-file-uploader'
 
-interface IItemData {
-	index: String
-	item: String
-	separators: Object
-}
-
 export default function CameraScreen() {
 	const [imagesStore, setImagesStore] = useState<string[]>([])
+	const [refreshing, setRefreshing] = useState(false)
+
+	const wait = (timeout: number) => {
+		return new Promise((resolve) => {
+			setTimeout(resolve, timeout)
+		})
+	}
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true)
+		wait(1000).then(() => setRefreshing(false))
+	}, [])
 
 	useEffect(() => {
 		;(async () => {
@@ -77,6 +84,9 @@ export default function CameraScreen() {
 				data={imagesStore}
 				keyExtractor={(imageStore) => imageStore}
 				renderItem={renderImage}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			/>
 		</>
 	) : null

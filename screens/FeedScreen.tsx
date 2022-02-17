@@ -1,9 +1,27 @@
-import React, { useState, useEffect } from 'react'
-import { StyleSheet, Image, FlatList, ListRenderItem } from 'react-native'
+import React, { useState, useEffect, useCallback } from 'react'
+import {
+	StyleSheet,
+	Image,
+	FlatList,
+	ListRenderItem,
+	RefreshControl,
+} from 'react-native'
 import axios from 'axios'
 
 export default function FeedScreen() {
 	const [serverImages, setServerImages] = useState<string[]>([])
+	const [refreshing, setRefreshing] = useState(false)
+
+	const wait = (timeout: number) => {
+		return new Promise((resolve) => {
+			setTimeout(resolve, timeout)
+		})
+	}
+
+	const onRefresh = useCallback(() => {
+		setRefreshing(true)
+		wait(2000).then(() => setRefreshing(false))
+	}, [])
 
 	useEffect(() => {
 		;(async () => {
@@ -33,6 +51,10 @@ export default function FeedScreen() {
 			data={serverImages}
 			keyExtractor={(serverImage) => serverImage}
 			renderItem={renderImage}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+			}
+			inverted={true}
 		/>
 	) : null
 }
